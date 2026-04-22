@@ -109,8 +109,34 @@ body { background:var(--bg); font-family:'Pretendard',-apple-system,sans-serif; 
 .tip-ref::before{content:'📚 ';}
 .sec-gap{height:6px;}
 
-/* RESULT — 맨 아래 */
-.result-area { margin-top:56px; padding-top:40px; border-top:1px solid var(--border); }
+/* CTA 버튼 */
+.cta-wrap { margin-top:32px; text-align:center; }
+.cta-btn {
+  display:inline-flex; align-items:center; gap:8px;
+  background:var(--text); color:white;
+  font-family:'Pretendard',sans-serif; font-size:15px; font-weight:600;
+  padding:16px 32px; border-radius:100px; border:none;
+  cursor:pointer; transition:all .2s; letter-spacing:-.2px;
+  box-shadow:0 4px 20px rgba(26,24,22,0.2);
+}
+.cta-btn:hover { transform:translateY(-2px); box-shadow:0 6px 24px rgba(26,24,22,0.28); }
+.cta-btn:disabled { background:var(--text3); cursor:not-allowed; transform:none; box-shadow:none; }
+.cta-hint { margin-top:10px; font-size:12px; color:var(--text3); }
+
+/* RESULT PAGE */
+.page { display:none; }
+.page.active { display:block; }
+
+/* RESULT — 결과 페이지 */
+.result-area { padding:52px 20px 80px; }
+.result-back {
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:13px; font-weight:500; color:var(--text2);
+  cursor:pointer; margin-bottom:32px; transition:color .15s;
+  background:none; border:none; font-family:'Pretendard',sans-serif;
+  padding:0;
+}
+.result-back:hover { color:var(--text); }
 .result-eyebrow { font-size:11px; font-weight:600; letter-spacing:2px; color:var(--text3); text-transform:uppercase; margin-bottom:10px; }
 .result-heading { font-family:'Instrument Serif',serif; font-size:26px; font-weight:400; color:var(--text); margin-bottom:20px; line-height:1.3; }
 
@@ -178,6 +204,7 @@ body { background:var(--bg); font-family:'Pretendard',-apple-system,sans-serif; 
 </style>
 </head>
 <body>
+<div id="pageCheck" class="page active">
 <div class="wrap">
 
   <div class="hdr">
@@ -251,10 +278,32 @@ body { background:var(--bg); font-family:'Pretendard',-apple-system,sans-serif; 
   <div class="cat-row" id="catRow"></div>
   <div class="item-list" id="itemList"></div>
 
-  <!-- 결과 — 맨 아래 -->
+  <!-- CTA 버튼 -->
+  <div class="cta-wrap">
+    <button class="cta-btn" id="ctaBtn" onclick="goResult()" disabled>
+      진단 결과 확인하기 →
+    </button>
+    <div class="cta-hint" id="ctaHint">항목을 체크하면 결과를 확인할 수 있어요</div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-left">
+      <div class="footer-brand">셀린맘</div>
+      <a class="footer-insta" href="https://instagram.com/selin.mom._" target="_blank">@selin.mom._</a>
+    </div>
+    <div class="footer-src">K-ASQ · ASQ:SE-2 · PLOS Medicine (2021)<br>StatPearls NCBI (2022) · 영유아건강검진 지침</div>
+  </div>
+
+</div>
+</div>
+
+<!-- 결과 페이지 -->
+<div id="pageResult" class="page">
+<div class="wrap">
   <div class="result-area">
-    <div class="result-eyebrow">체크 결과</div>
-    <div class="result-heading" id="rHead">체크를 완료하면 결과가 나타나요</div>
+    <button class="result-back" onclick="goBack()">← 체크리스트로 돌아가기</button>
+    <div class="result-eyebrow">진단 결과</div>
+    <div class="result-heading" id="rHead">잠시만요...</div>
 
     <div class="rc rc-g" id="rcG">
       <div class="rc-top"><div class="rc-icon">✦</div>
@@ -287,8 +336,14 @@ body { background:var(--bg); font-family:'Pretendard',-apple-system,sans-serif; 
       <div class="ac-label" id="acLbl"></div>
       <div class="ac-grid" id="acGrid"></div>
     </div>
-  </div>
 
+    <div style="margin-top:32px;text-align:center;">
+      <button class="cta-btn" onclick="goBack()" style="background:var(--a18);">
+        ← 체크리스트로 돌아가기
+      </button>
+    </div>
+
+  </div>
   <div class="footer">
     <div class="footer-left">
       <div class="footer-brand">셀린맘</div>
@@ -296,7 +351,7 @@ body { background:var(--bg); font-family:'Pretendard',-apple-system,sans-serif; 
     </div>
     <div class="footer-src">K-ASQ · ASQ:SE-2 · PLOS Medicine (2021)<br>StatPearls NCBI (2022) · 영유아건강검진 지침</div>
   </div>
-
+</div>
 </div>
 <script>
 const items=[
@@ -360,7 +415,7 @@ const cats=['전체','정서','언어','사회성','인지','자아'];
 const mc=m=>m===18?'18':m===21?'21':'24';
 const cnt=m=>items.filter((it,i)=>it.mo===m&&ck[i]).length;
 
-function render(){rMo();rProg();rCats();rItems();rResult();}
+function render(){rMo();rProg();rCats();rItems();}
 
 function rMo(){
   [18,21,24].forEach(m=>{
@@ -440,7 +495,34 @@ function rResult(){
 
 function setMo(m){mo=m;cat='전체';render();}
 function setCat(c){cat=c;rCats();rItems();}
-function tog(i){ck[i]=!ck[i];rMo();rProg();rItems();rResult();}
+function tog(i){
+  ck[i]=!ck[i];
+  rMo();rProg();rItems();
+  // CTA 버튼 활성화
+  const total = cnt(mo);
+  const btn = document.getElementById('ctaBtn');
+  const hint = document.getElementById('ctaHint');
+  if(total > 0){
+    btn.disabled = false;
+    hint.textContent = total + '개 체크 완료 · 결과를 확인해보세요';
+  } else {
+    btn.disabled = true;
+    hint.textContent = '항목을 체크하면 결과를 확인할 수 있어요';
+  }
+}
+
+function goResult(){
+  document.getElementById('pageCheck').classList.remove('active');
+  document.getElementById('pageResult').classList.add('active');
+  window.scrollTo(0,0);
+  setTimeout(rResult, 30);
+}
+
+function goBack(){
+  document.getElementById('pageResult').classList.remove('active');
+  document.getElementById('pageCheck').classList.add('active');
+  window.scrollTo(0,0);
+}
 
 render();
 </script>
